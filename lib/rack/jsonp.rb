@@ -11,13 +11,13 @@ module Rack
 
     def call(env)
       request = Rack::Request.new(env)
-      requesting_jsonp = Pathname(request.env['PATH_INFO']).extname =~ /^\.jsonp$/i
+      requesting_jsonp = Pathname(request.env['PATH_INFO']).extname =~ /^\.json$/i
       callback = request.params['callback']
 
       return [400,{},[]] if requesting_jsonp && !self.valid_callback?(callback)
 
       if requesting_jsonp
-        env['PATH_INFO'] = env['PATH_INFO'].sub(/\.jsonp/i, '.json')
+        env['PATH_INFO'] = env['PATH_INFO']
         env['REQUEST_URI'] = env['PATH_INFO']
       end
 
@@ -35,14 +35,13 @@ module Rack
     end
 
   protected
-    
     # Do not allow arbitrary Javascript in the callback.
     #
     # @return [Regexp]
     VALID_CALLBACK_PATTERN = /^[a-zA-Z0-9\._]+$/
 
     # @return [String] the JSONP response mime type.
-    MIME_TYPE = 'application/javascript'
+    MIME_TYPE = 'application/json'
 
     # Checks if the callback function name is safe/valid.
     #
